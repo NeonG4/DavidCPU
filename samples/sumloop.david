@@ -1,0 +1,26 @@
+
+
+// ---------------
+// Add numbers from 1 to 10 
+
+// r4 iterator
+// r3 accumualator 
+
+val 10 --> r4 
+
+val 0 --> r3
+
+Loop: // address 0x08, instruct 2 
+
+    // r4 --
+    val -1 --> r1
+    add r4 r1 --> r4
+
+    // r3 += r4
+    add r3 r4 --> r3
+
+    // if r4 > 0, goto Loop
+    jmp.if Loop  r4 
+    
+    
+

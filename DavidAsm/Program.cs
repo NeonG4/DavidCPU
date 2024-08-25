@@ -21,8 +21,10 @@ namespace DavidAsm
 
             var w = new Worker(emit);
 
-            var lines = File.ReadLines(@"C:\dev\DavidCPU\samples\add.david");
+            var lines = File.ReadLines(@"C:\dev\DavidCPU\samples\sumloop.david");
             w.Work(lines);
+
+            writer.WriteToFile(Console.Out);
 
             // w.HandleLine("add r1 r2 --> r3");
         }

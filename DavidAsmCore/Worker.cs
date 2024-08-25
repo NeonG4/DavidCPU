@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace DavidAsmCore
 {
+    
+
     public class Worker
     {
         private readonly OpEmitter _emitter;
@@ -20,8 +24,8 @@ namespace DavidAsmCore
             foreach(var line in lines)
             {
                 // ignore comments or blank lines 
-                if (line.StartsWith("//"))
-                {
+                if (line.Trim().StartsWith("//"))
+                {                    
                     continue;
                 }
 
@@ -37,19 +41,52 @@ namespace DavidAsmCore
             _emitter.Exit();
         }
 
+        // Get label from:
+        //   name:  
+        //   name:  // comment 
+        private readonly Regex _regExLabelMatch = new Regex(@"^\s*([A-Za-z0-9]+?):\s*(//.*)?$");
+
+        // Labels are an identifier followed by a colon "Label:" 
+        // Could have a comment after the ':'
+        private bool HandleLabel(string line)
+        {         
+            var m = _regExLabelMatch.Match(line);
+
+            if (m.Success)
+            {
+                string labelName = m.Groups[1].Value;
+
+                Label l = Label.New(labelName);
+                this._emitter.MarkLabel(l);
+
+                return true;
+            }
+
+            return false;
+        }
+
         public void HandleLine(string line)
         {
+            // Does this declare a label?
+            if (HandleLabel(line))
+            {
+                return;
+            }
+
+
             var lp = new LineParser(line);
             var op = lp.GetOp();
 
             switch(op) 
             {
                 case Opcode.Val:
-                    var i = lp.GetConstant();
-                    lp.GetArrow();
-                    var r = lp.GetRegister();
+                    {
+                        var i = lp.GetConstant();
+                        lp.GetArrow();
+                        var r = lp.GetRegister();
 
-                    _emitter.LoadConstant((Int16) i, r);
+                        _emitter.LoadConstant((Int16)i, r);
+                    }
                     break;
 
                 case Opcode.Add:
@@ -62,100 +99,19 @@ namespace DavidAsmCore
                         _emitter.Add(in1, in2, regOutput);
                     }
                     break;
+
+                case Opcode.JumpIf:
+                    {
+                        Label l = lp.GetLabel();
+                        Register r = lp.GetRegister();
+                        _emitter.JumpIf(l, r);
+                    }
+                    break;
             
             }
 
             // Ensure end of line 
             lp.IsEOL();
-        }
-    }
-
-
-    // Parse a specific line 
-    public class LineParser
-    {
-        int _idx = 0;
-
-        private readonly string[] _parts;
-
-        public LineParser(string line)
-        {
-            _parts = line.Split(' ').Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
-
-        }
-
-        // Get the next token        
-        // return null if at end
-        private string GetToken()
-        {
-            if (_idx >= _parts.Length)
-            {
-                return null;
-            }
-
-            return _parts[_idx++];
-        }
-
-        public int GetConstant()
-        {
-            var t = GetToken();
-            if (int.TryParse(t, out var val))
-            {
-                throw new InvalidOperationException($"Expected number, got: {t}");
-            }
-
-            return val;
-        }
-
-        public void IsEOL()
-        {
-            var t = GetToken();
-            if (t != null)
-            {
-                throw new InvalidOperationException($"Expected end of line.");
-            }
-        }
-
-        public void GetArrow()
-        {
-            var t = GetToken();
-            if (t != "-->")
-            {
-                throw new InvalidOperationException($"Expected '-->' operator");
-            }
-        }
-
-        public Register GetRegister()
-        {
-            var t = GetToken();
-
-            if (t.Length < 2 || t[0] != 'r')
-            {
-                throw new InvalidOperationException($"Expected register, like `r#`.");
-            }
-
-            var t2 = t.Substring(1);
-            var regId = int.Parse(t2);
-
-            if (regId < 0 || regId > 4) 
-            {
-                throw new InvalidOperationException($"Invalid register index. Only supports r1...r4");
-            }
-
-            return new Register { Value = regId };
-        }
-
-        public Opcode GetOp()
-        {
-            var token = GetToken();
-
-
-            if (!Enum.TryParse<Opcode>(token, ignoreCase:true, out var op))
-            {
-                throw new InvalidOperationException($"Expected opcode");
-            }
-
-            return op;
         }
     }
 }

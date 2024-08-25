@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,6 +11,7 @@ namespace DavidAsmCore
     {
         Val = 0x40,
         Add = 0x10,
+        JumpIf = 0x22,
         Exit = 0x20,
     }
 
@@ -21,7 +23,7 @@ namespace DavidAsmCore
         {
             _writer = writer;
         }
-
+                
         public void Exit()
         {
             _writer.WriteComment("Exit");
@@ -29,6 +31,30 @@ namespace DavidAsmCore
             _writer.WritePaddingByte();
             _writer.WritePaddingByte();
             _writer.WritePaddingByte();
+        }
+
+
+        public void MarkLabel(Label label)        
+        {
+            _writer.WriteBlankLine();
+            _writer.WriteComment($"{label}");
+
+            _writer.MarkLabel(label);
+        }
+
+        // Offset is unknown, will need 
+        public void JumpIf(Label label, Register reg)
+        {
+            _writer.WriteComment($"Jmp to {label} if {reg} > 0");
+
+            _writer.WriteOp(Opcode.JumpIf);
+
+            _writer.WriteLabel(label, TouchupKind.Relative);
+
+
+            _writer.WriteReg(reg);
+
+            _writer.WriteBlankLine();
         }
 
         // Save constant to register
