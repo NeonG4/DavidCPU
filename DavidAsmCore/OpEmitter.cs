@@ -223,8 +223,8 @@ namespace DavidAsmCore
             _writer.WriteComment($"nand {in1}, {in2} --> {output}");
             _writer.WriteOp(Opcode.Nand);
             _writer.WriteReg(in1);
+            _writer.WriteReg(in2);
             _writer.WriteReg(output);
-            _writer.WritePaddingByte();
 
             _writer.WriteBlankLine();
         }       
@@ -233,8 +233,8 @@ namespace DavidAsmCore
             _writer.WriteComment($"xor {in1}, {in2} --> {output}");
             _writer.WriteOp(Opcode.Xor);
             _writer.WriteReg(in1);
+            _writer.WriteReg(in2);
             _writer.WriteReg(output);
-            _writer.WritePaddingByte();
 
             _writer.WriteBlankLine();
         }
