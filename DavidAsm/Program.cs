@@ -21,8 +21,9 @@ namespace DavidAsm
             var w = new Worker();
 
             var lines = File.ReadLines(@"C:\Users\david\dev\DavidCPU\DavidAsmCore.Tests\Tests\consoletest.david");
+
             w.Work(lines);
-            w.WriteToFile(Console.Out);
+            w.WriteToFile(Console.Out, compact: true);
 
             // w.HandleLine("add r1 r2 --> r3");
         }

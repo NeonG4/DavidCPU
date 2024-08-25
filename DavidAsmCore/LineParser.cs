@@ -30,7 +30,16 @@ namespace DavidAsmCore
                 return null;
             }
 
-            return _parts[_idx++];
+            var token = _parts[_idx].Trim();
+            _idx++;
+
+            if (token.StartsWith("//"))
+            {
+                // End of line comment, ignore it.                 
+                return null;
+            }
+
+            return token;
         }
 
         public int GetConstant()
@@ -70,29 +79,13 @@ namespace DavidAsmCore
 
         public Register GetRegister()
         {
-            var t = GetToken().ToLower();
+            var t = GetToken();
             return GetRegister(t);
         }
 
         public Register GetRegister(string t)
         {
-            if (t.Length < 2 || t[0] != 'r')
-            {
-                throw new InvalidOperationException($"Expected register, like `r#`.");
-            }
-
-            var t2 = t.Substring(1);
-            if (!int.TryParse(t2, out var regId))
-            {
-                throw new InvalidOperationException($"Expected regsiter, got '{t}'");
-            }            
-
-            if (regId < 0 || regId > 4)
-            {
-                throw new InvalidOperationException($"Invalid register index. Only supports r1...r4");
-            }
-
-            return new Register { Value = regId };
+            return Register.Parse(t);
         }
 
         // Will set one of hte overloads...
@@ -103,7 +96,7 @@ namespace DavidAsmCore
         // Returns a AddressSpec or Register
         public object GetAddressOrRegister()
         {
-            var t = GetToken().Trim();
+            var t = GetToken();
 
             if (t[0] == '[')
             {
@@ -132,6 +125,20 @@ namespace DavidAsmCore
         }
 
 
+        // Return a Register or a Label
+        public object GetRegisterOrLabel()
+        {
+            var t = GetToken();
+
+            if (t[0] == 'r')
+            {
+                var reg = GetRegister(t);
+                return reg;
+            }
+            
+            return Label.New(t); // will validate
+        }
+
         private readonly Dictionary<string, Opcode> _opcOdes = new Dictionary<string, Opcode>(StringComparer.OrdinalIgnoreCase)
         {
             { "val", Opcode.Val },
@@ -144,8 +151,12 @@ namespace DavidAsmCore
             { "not", Opcode.Not },
             { "nand", Opcode.Nand },
             { "xor", Opcode.Xor },
+            { "exit", Opcode.Exit },
+
             { "jmp.if", Opcode.JumpIf },
-            { "mov", Opcode.Mov }
+            { "jmp", Opcode.Jump_Overload},
+
+            { "mov", Opcode.Mov_Overload }
         };
 
         public Opcode GetOp()

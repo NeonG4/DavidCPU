@@ -22,7 +22,7 @@ namespace DavidAsmCore
         }
 
         // Get the list of bytes we emitted. 
-        public void WriteToFile(TextWriter output)
+        public void WriteToFile(TextWriter output, bool compact=false)
         {
             ApplyTouchups();
 
@@ -31,10 +31,12 @@ namespace DavidAsmCore
             for(var i = 0; i < _bytes.Count; i++)
             {
                 var b = _bytes[i];
-
-                if (_annotations.TryGetValue(i, out var sb))
+                if (!compact)
                 {
-                    output.Write(sb.ToString());
+                    if (_annotations.TryGetValue(i, out var sb))
+                    {
+                        output.Write(sb.ToString());
+                    }
                 }
 
                 string binaryString = Convert.ToString(b, 2).PadLeft(8, '0');
