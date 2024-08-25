@@ -8,7 +8,7 @@ namespace DavidAsm
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello, World!");
+            Console.WriteLine("This has been changed... Just a test commit...");
 
             var emit = new OpEmitter();
 
