@@ -29,7 +29,7 @@ namespace DavidAsmCore
         public void Exit()
         {
             _writer.WriteComment("Exit");
-            _writer.WriteOp(Opcode.Val);
+            _writer.WriteOp(Opcode.Exit);
             _writer.WritePaddingByte();
             _writer.WritePaddingByte();
             _writer.WritePaddingByte();

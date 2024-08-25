@@ -1,0 +1,34 @@
+val 1 --> r1 // operation value 1
+val 1 --> r2 // operation value 2
+val 500 --> r5 
+val 1 --> r4 // incrementer 
+
+// memory 500-521 is fib numbers
+// r5 is pointer
+// r3 is looper
+
+mov r1 --> [r5]
+add r5 r4 --> r5
+add r5 r4 --> r5
+mov r1 --> [r5]
+add r5 r4 --> r5
+add r5 r4 --> r5
+
+val 10 --> r3 // how many times to loop
+// ----- init complete -----
+
+// main loop
+Loop1: 
+sub r5 r4 --> r1
+sub r1 r4 --> r1
+mov [r1] --> r2
+sub r1 r4 --> r1
+sub r1 r4 --> r1
+mov [r1] --> r1
+
+add r1 r2 --> r1
+mov r1 --> [r5]
+add r5 r4 --> r5
+add r5 r4 --> r5
+sub r3 r4 --> r3
+jmp.if Loop1 r3
