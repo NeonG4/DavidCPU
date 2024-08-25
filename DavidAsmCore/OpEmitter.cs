@@ -13,6 +13,7 @@ namespace DavidAsmCore
         Val = 0x40,
         Add = 0x10,
         Sub = 0x11,
+        Mul = 0x12,
         JumpIf = 0x22,
         Exit = 0x20,
     }
@@ -92,6 +93,16 @@ namespace DavidAsmCore
         {
             _writer.WriteComment($"sub {in1}, {in2} --> {output}");
             _writer.WriteOp(Opcode.Sub);
+            _writer.WriteReg(in1);
+            _writer.WriteReg(in2);
+            _writer.WriteReg(output);
+
+            _writer.WriteBlankLine();
+        }        
+        public void Mul(Register in1, Register in2, Register output)
+        {
+            _writer.WriteComment($"mul {in1}, {in2} --> {output}");
+            _writer.WriteOp(Opcode.Mul);
             _writer.WriteReg(in1);
             _writer.WriteReg(in2);
             _writer.WriteReg(output);
