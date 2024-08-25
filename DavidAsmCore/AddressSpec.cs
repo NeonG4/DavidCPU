@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace DavidAsmCore
 {
-
-    // Represent an address specifier 
+    /// <summary>
+    /// Represent an address specifier.
+    /// </summary>
     public abstract class AddressSpec
     {
     }

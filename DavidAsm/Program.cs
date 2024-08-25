@@ -12,8 +12,6 @@ namespace DavidAsm
 
             var emit = new OpEmitter();
 
-            // emit.Move(1234, )
-
 #if false
             emit.LoadConstant(123, Register.R1);
             emit.Add(Register.R1, Register.R2, Register.R3);
