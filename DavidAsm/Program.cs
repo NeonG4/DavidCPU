@@ -20,7 +20,7 @@ namespace DavidAsm
 
             var w = new Worker();
 
-            var lines = File.ReadLines(@"C:\Users\david\dev\DavidCPU\DavidAsmCore.Tests\Tests\sub.david");
+            var lines = File.ReadLines(@"C:\Users\david\dev\DavidCPU\DavidAsmCore.Tests\Tests\consoletest.david");
             w.Work(lines);
             w.WriteToFile(Console.Out);
 

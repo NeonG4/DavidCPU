@@ -1,0 +1,68 @@
+// r2 is console pointer
+val 1000 --> r2
+val 2 --> r3
+
+// H
+val 34 --> r1
+mov r1 --> [r2]
+add r2 r3 --> r2
+
+// e
+val 5 --> r1
+mov r1 --> [r2]
+add r2 r3 --> r2
+
+// l
+val 12 --> r1
+mov r1 --> [r2]
+add r2 r3 --> r2
+
+// l
+val 12 --> r1
+mov r1 --> [r2]
+add r2 r3 --> r2
+
+// o
+val 15 --> r1
+mov r1 --> [r2]
+add r2 r3 --> r2
+
+// space
+val 0 --> r1
+mov r1 --> [r2]
+add r2 r3 --> r2
+
+// W 
+val 49 --> r1
+mov r1 --> [r2]
+add r2 r3 --> r2
+
+// o
+val 15 --> r1
+mov r1 --> [r2]
+add r2 r3 --> r2
+
+// r
+val 18 --> r1
+mov r1 --> [r2]
+add r2 r3 --> r2
+
+// l
+val 12 --> r1
+mov r1 --> [r2]
+add r2 r3 --> r2
+
+// d
+val 4 --> r1
+mov r1 --> [r2]
+add r2 r3 --> r2
+
+// !
+val 65 --> r1
+mov r1 --> [r2]
+add r2 r3 --> r2
+
+// a
+val 1 --> r1
+mov r1 --> [r2]
+add r2 r3 --> r2
