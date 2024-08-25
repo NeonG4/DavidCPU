@@ -77,6 +77,31 @@ namespace DavidAsmCore
             _writer.WriteBlankLine();
         }
 
+        // Mov [addressSrc] --> RegDest
+        public void MoveMemToReg(int addressSrc, Register regDest)
+        {
+        }
+
+        // Mov [regSrc] --> regDst
+        public void MoveMemToReg(Register regAddressSrc, Register regDest)
+        {
+
+        }
+
+
+        // Mov regSrc --> [AddressDest]
+        public void MoveRegToMem(Register regSrc, int addressDest)
+        {
+        }
+
+        // Mov regSrc --> [regDst]
+        public void MoveRegToMem(Register regSrc, Register regAddressDest)
+        {
+        }
+
+ 
+
+        // Arithmetic operations 
         public void Add(Register in1, Register in2, Register output)
         {
             _writer.WriteComment($"add {in1}, {in2} --> {output}");
