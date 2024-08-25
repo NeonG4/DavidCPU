@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection.Metadata;
 using System.Text;
@@ -15,15 +16,23 @@ namespace DavidAsmCore
         Exit = 0x20,
     }
 
+    /// <summary>
+    /// Emit Opcodes. 
+    /// </summary>
     public class OpEmitter
     {
         private readonly Writer _writer;
 
-        public OpEmitter(Writer writer)
+        public OpEmitter()
         {
-            _writer = writer;
+            _writer = new Writer();
         }
                 
+        public void WriteToFile(TextWriter output)
+        {
+            _writer.WriteToFile(output);
+        }
+
         public void Exit()
         {
             _writer.WriteComment("Exit");

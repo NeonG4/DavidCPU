@@ -10,8 +10,7 @@ namespace DavidAsm
         {
             Console.WriteLine("Hello, World!");
 
-            var writer = new Writer(Console.Out);
-            var emit = new OpEmitter(writer);
+            var emit = new OpEmitter();
 
 #if false
             emit.LoadConstant(123, Register.R1);
@@ -19,12 +18,11 @@ namespace DavidAsm
 #endif
 
 
-            var w = new Worker(emit);
+            var w = new Worker();
 
             var lines = File.ReadLines(@"C:\dev\DavidCPU\samples\sumloop.david");
             w.Work(lines);
-
-            writer.WriteToFile(Console.Out);
+            w.WriteToFile(Console.Out);
 
             // w.HandleLine("add r1 r2 --> r3");
         }

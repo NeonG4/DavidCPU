@@ -8,16 +8,16 @@ using System.Text;
 
 namespace DavidAsmCore
 {
+    // Emit raw bytes and track touchups. 
     public class Writer
     {
-        // private readonly TextWriter _ouput;
-
+        // Actual bytes to write out`
         private List<byte> _bytes = new List<byte>();
 
-        // public int CurrentByteOffset { get; private set; }
+        // Mapping of annotations ahead of each byte offset. 
         private Dictionary<int, StringBuilder> _annotations = new Dictionary<int, StringBuilder>();
 
-        public Writer(TextWriter logger)
+        public Writer()
         {
         }
 
@@ -89,13 +89,7 @@ namespace DavidAsmCore
 
         public void WriteByte(byte b)
         {
-            // string binaryString = Convert.ToString(b, 2).PadLeft(8, '0');
-
-            // Emit byte as binary. 
-            //_ouput.WriteLine(binaryString);
             _bytes.Add(b);
-
-            // this.CurrentByteOffset++;
         }
 
 
@@ -168,7 +162,9 @@ namespace DavidAsmCore
 
     public enum TouchupKind
     {
+        // Relative, 4-byte boundary. 
         Relative,
+
         Absolute
     }
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -14,9 +15,14 @@ namespace DavidAsmCore
     {
         private readonly OpEmitter _emitter;
 
-        public Worker(OpEmitter emitter)
+        public Worker()
         {
-            _emitter = emitter;
+            _emitter = new OpEmitter();
+        }
+
+        public void WriteToFile(TextWriter textWriter)
+        {
+            _emitter.WriteToFile(textWriter);
         }
 
         public void Work(IEnumerable<string> lines)
