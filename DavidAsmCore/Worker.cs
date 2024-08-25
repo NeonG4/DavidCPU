@@ -9,8 +9,6 @@ using System.Threading.Tasks;
 
 namespace DavidAsmCore
 {
-    
-
     public class Worker
     {
         private readonly OpEmitter _emitter;
@@ -132,7 +130,48 @@ namespace DavidAsmCore
                         _emitter.JumpIf(l, r);
                     }
                     break;
-            
+
+
+                case Opcode.Mov:
+                    {
+                        // Determine overload. 
+                        // lp.GetAddressOrRegister(out var addr1, out var addrReg1, out var Reg1);
+                        var arg1 = lp.GetAddressOrRegister();
+
+                        lp.GetArrow();
+
+                        // lp.GetAddressOrRegister(out var addr2, out var addrReg2, out var Reg2);
+                        var arg2 = lp.GetAddressOrRegister();
+
+
+                        if (arg1 is AddressSpec addr1)
+                        {
+                            if (arg2 is Register reg2)
+                            {
+                                _emitter.MoveMemToReg(addr1, reg2);
+                            } else
+                            {
+                                throw new InvalidOperationException($"First argument is an address, so second arg must be a register.");
+                            }
+                        }
+                        else if (arg1 is Register reg1)
+                        {
+                            if (arg2 is AddressSpec addr2)
+                            {
+                                _emitter.MoveRegToMem(reg1, addr2);
+                            }
+                            else
+                            {
+                                throw new InvalidOperationException($"First argument is an register, so second arg must be a address.");
+                            }
+                        }
+                        else
+                        {
+                            // shouldn't happen. 
+                            throw new InvalidOperationException($"Compiler error");
+                        }
+                    }
+                    break;
             }
 
             // Ensure end of line 

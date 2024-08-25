@@ -71,7 +71,11 @@ namespace DavidAsmCore
         public Register GetRegister()
         {
             var t = GetToken().ToLower();
+            return GetRegister(t);
+        }
 
+        public Register GetRegister(string t)
+        {
             if (t.Length < 2 || t[0] != 'r')
             {
                 throw new InvalidOperationException($"Expected register, like `r#`.");
@@ -91,6 +95,42 @@ namespace DavidAsmCore
             return new Register { Value = regId };
         }
 
+        // Will set one of hte overloads...
+        // [1234]  // literal address
+        // [r1] // address specified by register 
+        // r1 // direct register 
+       
+        // Returns a AddressSpec or Register
+        public object GetAddressOrRegister()
+        {
+            var t = GetToken().Trim();
+
+            if (t[0] == '[')
+            {
+                if (t[t.Length - 1] != ']')
+                {
+                    throw new InvalidOperationException($"Memory address must be enclosed in [ ... ] ");
+                }
+
+                var val = t.Substring(1, t.Length - 2);
+
+                if (int.TryParse(val, out var number))
+                {
+                    return new ConstantAddressSpec { Address = number };
+                }
+                var reg = GetRegister(val);
+                return new RegisterAddressSpec {  Register = reg };
+            }
+
+            if (t[0] == 'r')
+            {
+                var reg = GetRegister(t);
+                return reg;
+            }
+
+            throw new InvalidOperationException($"Must be a register or an address (enclosed in [ ... ]).");
+        }
+
 
         private readonly Dictionary<string, Opcode> _opcOdes = new Dictionary<string, Opcode>(StringComparer.OrdinalIgnoreCase)
         {
@@ -98,7 +138,8 @@ namespace DavidAsmCore
             { "add", Opcode.Add },
             { "sub", Opcode.Sub },
             { "mul", Opcode.Mul },
-            { "jmp.if", Opcode.JumpIf }
+            { "jmp.if", Opcode.JumpIf },
+            { "mov", Opcode.Mov }
         };
 
         public Opcode GetOp()

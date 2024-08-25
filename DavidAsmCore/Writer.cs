@@ -73,6 +73,10 @@ namespace DavidAsmCore
 
         public void WriteOp(Opcode opcode)
         {
+            if ((int) opcode > 900)
+            {
+                throw new InvalidOperationException($"Can't write overload opcode: " + opcode);
+            }
             this.WriteByte((byte) opcode);
         }
 

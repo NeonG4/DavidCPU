@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DavidAsmCore
 {
-    public enum Opcode : byte
+    public enum Opcode
     {
         Val = 0x40,
         Add = 0x10,
@@ -16,6 +16,13 @@ namespace DavidAsmCore
         Mul = 0x12,
         JumpIf = 0x22,
         Exit = 0x20,
+
+        // Overloads. 
+        Mov = 999,
+        Mov_RCA = 0x41, // 0100 0001
+        Mov_CRA = 0x42, // 0100 0010
+        Mov_RCR = 0x43, // 0100 0011
+        Mov_CRR = 0x44, // 0100 0100
     }
 
     /// <summary>
@@ -79,6 +86,62 @@ namespace DavidAsmCore
             _writer.WriteBlankLine();
         }
 
+        // address can be specified by iether Constant or Register 
+        // Mov [addressSrc] --> RegDest
+        // Mov regSrc --> [AddressDest]
+        public void MoveMemToReg(AddressSpec addrSource, Register regDest)
+        {
+            _writer.WriteComment($"Mem {addrSource} --> {regDest}");
+            
+            if (addrSource is ConstantAddressSpec c1)
+            {
+                _writer.WriteOp(Opcode.Mov_RCA); // Ram-->CPU
+                _writer.WriteI16((Int16) c1.Address);
+                _writer.WriteReg(regDest);
+            } 
+            else if (addrSource is RegisterAddressSpec r1)
+            {
+                _writer.WriteOp(Opcode.Mov_RCR); // Ram-->CPU
+                _writer.WriteReg(r1.Register);
+                _writer.WriteReg(regDest);
+                _writer.WritePaddingByte();
+            }
+            else
+            {
+                throw new NotImplementedException($"Unrecognized address kind");
+            }
+
+            _writer.WriteBlankLine();
+        }
+
+        // Mov regSrc --> [AddressDest]
+        // Mov regSrc --> [regDst]
+        public void MoveRegToMem(Register regSource, AddressSpec addrDest)
+        {
+            _writer.WriteComment($"Mem {regSource} --> {addrDest}");
+
+            if (addrDest is ConstantAddressSpec c2)
+            {
+                _writer.WriteOp(Opcode.Mov_CRA); // CPU --> Ram
+                _writer.WriteReg(regSource);
+                _writer.WriteI16((Int16)c2.Address);                
+            }
+            else if (addrDest is RegisterAddressSpec r2)
+            {
+                _writer.WriteOp(Opcode.Mov_CRR); // CPU --> Ram                
+                _writer.WriteReg(regSource);
+                _writer.WriteReg(r2.Register);
+                _writer.WritePaddingByte();
+            }
+            else
+            {
+                throw new NotImplementedException($"Unrecognized address kind");
+            }
+
+            _writer.WriteBlankLine();
+        }
+
+        // Arithmetic operations 
         public void Add(Register in1, Register in2, Register output)
         {
             _writer.WriteComment($"add {in1}, {in2} --> {output}");
