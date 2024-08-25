@@ -96,6 +96,7 @@ namespace DavidAsmCore
         {
             { "val", Opcode.Val },
             { "add", Opcode.Add },
+            { "sub", Opcode.Sub },
             { "jmp.if", Opcode.JumpIf }
         };
 

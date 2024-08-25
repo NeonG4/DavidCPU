@@ -105,7 +105,16 @@ namespace DavidAsmCore
                         _emitter.Add(in1, in2, regOutput);
                     }
                     break;
+                case Opcode.Sub:
+                    {
+                        Register in1 = lp.GetRegister();
+                        Register in2 = lp.GetRegister();
+                        lp.GetArrow();
+                        Register regOutput = lp.GetRegister();
 
+                        _emitter.Sub(in1, in2, regOutput);
+                    }
+                    break;
                 case Opcode.JumpIf:
                     {
                         Label l = lp.GetLabel();
