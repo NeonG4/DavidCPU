@@ -18,9 +18,9 @@ namespace DavidAsmCore
             _emitter = new OpEmitter();
         }
 
-        public void WriteToFile(TextWriter textWriter)
+        public void WriteToFile(TextWriter textWriter, bool compact = false)
         {
-            _emitter.WriteToFile(textWriter);
+            _emitter.WriteToFile(textWriter, compact);
         }
 
         public void Work(IEnumerable<string> lines)
@@ -191,7 +191,28 @@ namespace DavidAsmCore
                     break;
 
 
-                case Opcode.Mov:
+                // jmp register 
+                // jmp label 
+                case Opcode.Jump_Overload:
+                    {
+                        var arg1 = lp.GetRegisterOrLabel();
+                        if (arg1 is Register r1)
+                        {
+                            _emitter.JumpReg(r1);
+                        }
+                        else if (arg1 is Label l1)
+                        {
+                            _emitter.JumpLabel(l1);
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException($"Expected Register or Label");
+                        }
+                    }
+                    break;
+
+
+                case Opcode.Mov_Overload:
                     {
                         // Determine overload. 
                         // lp.GetAddressOrRegister(out var addr1, out var addrReg1, out var Reg1);
@@ -221,7 +242,7 @@ namespace DavidAsmCore
                             }
                             else
                             {
-                                throw new InvalidOperationException($"First argument is an register, so second arg must be a address.");
+                                throw new InvalidOperationException($"First argument is an register, so second arg must be an address.");
                             }
                         }
                         else
@@ -231,6 +252,13 @@ namespace DavidAsmCore
                         }
                     }
                     break;
+
+                case Opcode.Exit:
+                    _emitter.Exit();
+                    break;
+
+                default:
+                    throw new InvalidOperationException($"Unrecognized opcode: {op} is not supported.");
             }
 
             // Ensure end of line 
