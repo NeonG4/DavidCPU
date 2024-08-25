@@ -98,6 +98,12 @@ namespace DavidAsmCore
             { "add", Opcode.Add },
             { "sub", Opcode.Sub },
             { "mul", Opcode.Mul },
+            { "div", Opcode.Div },
+            { "and", Opcode.And },
+            { "or", Opcode.Or },
+            { "not", Opcode.Not },
+            { "nand", Opcode.Nand },
+            { "xor", Opcode.Xor },
             { "jmp.if", Opcode.JumpIf }
         };
 

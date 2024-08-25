@@ -125,6 +125,65 @@ namespace DavidAsmCore
                         _emitter.Mul(in1, in2, regOutput);
                     }
                     break;
+                case Opcode.Div:
+                    {
+                        Register in1 = lp.GetRegister();
+                        Register in2 = lp.GetRegister();
+                        lp.GetArrow();
+                        Register regOutput = lp.GetRegister();
+
+                        _emitter.Div(in1, in2, regOutput);
+                    }
+                    break;
+                case Opcode.And:
+                    {
+                        Register in1 = lp.GetRegister();
+                        Register in2 = lp.GetRegister();
+                        lp.GetArrow();
+                        Register regOutput = lp.GetRegister();
+
+                        _emitter.And(in1, in2, regOutput);
+                    }
+                    break;
+                case Opcode.Or:
+                    {
+                        Register in1 = lp.GetRegister();
+                        Register in2 = lp.GetRegister();
+                        lp.GetArrow();
+                        Register regOutput = lp.GetRegister();
+
+                        _emitter.Or(in1, in2, regOutput);
+                    }
+                    break;
+                case Opcode.Not:
+                    {
+                        Register in1 = lp.GetRegister();
+                        lp.GetArrow();
+                        Register regOutput = lp.GetRegister();
+
+                        _emitter.Not(in1, regOutput);
+                    }
+                    break;
+                case Opcode.Nand:
+                    {
+                        Register in1 = lp.GetRegister();
+                        Register in2 = lp.GetRegister();
+                        lp.GetArrow();
+                        Register regOutput = lp.GetRegister();
+
+                        _emitter.Nand(in1, in2, regOutput);
+                    }
+                    break;                
+                case Opcode.Xor:
+                    {
+                        Register in1 = lp.GetRegister();
+                        Register in2 = lp.GetRegister();
+                        lp.GetArrow();
+                        Register regOutput = lp.GetRegister();
+
+                        _emitter.Xor(in1, in2, regOutput);
+                    }
+                    break;
                 case Opcode.JumpIf:
                     {
                         Label l = lp.GetLabel();

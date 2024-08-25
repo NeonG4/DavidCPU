@@ -14,6 +14,12 @@ namespace DavidAsmCore
         Add = 0x10,
         Sub = 0x11,
         Mul = 0x12,
+        Div = 0x13,
+        And = 0x14,
+        Or = 0x15, 
+        Not = 0x16,
+        Nand = 0x17,
+        Xor = 0x18,
         JumpIf = 0x22,
         Exit = 0x20,
     }
@@ -106,6 +112,66 @@ namespace DavidAsmCore
             _writer.WriteReg(in1);
             _writer.WriteReg(in2);
             _writer.WriteReg(output);
+
+            _writer.WriteBlankLine();
+        }
+        public void Div(Register in1, Register in2, Register output)
+        {
+            _writer.WriteComment($"div {in1}, {in2} --> {output}");
+            _writer.WriteOp(Opcode.Div);
+            _writer.WriteReg(in1);
+            _writer.WriteReg(in2);
+            _writer.WriteReg(output);
+
+            _writer.WriteBlankLine();
+        }
+        public void And(Register in1, Register in2, Register output)
+        {
+            _writer.WriteComment($"and {in1}, {in2} --> {output}");
+            _writer.WriteOp(Opcode.And);
+            _writer.WriteReg(in1);
+            _writer.WriteReg(in2);
+            _writer.WriteReg(output);
+
+            _writer.WriteBlankLine();
+        }
+        public void Or(Register in1, Register in2, Register output)
+        {
+            _writer.WriteComment($"or {in1}, {in2} --> {output}");
+            _writer.WriteOp(Opcode.Or);
+            _writer.WriteReg(in1);
+            _writer.WriteReg(in2);
+            _writer.WriteReg(output);
+
+            _writer.WriteBlankLine();
+        }
+        public void Not(Register in1, Register output)
+        {
+            _writer.WriteComment($"not {in1} --> {output}");
+            _writer.WriteOp(Opcode.Not);
+            _writer.WriteReg(in1);
+            _writer.WriteReg(output);
+            _writer.WritePaddingByte();
+
+            _writer.WriteBlankLine();
+        }
+        public void Nand(Register in1, Register in2, Register output)
+        {
+            _writer.WriteComment($"nand {in1}, {in2} --> {output}");
+            _writer.WriteOp(Opcode.Nand);
+            _writer.WriteReg(in1);
+            _writer.WriteReg(output);
+            _writer.WritePaddingByte();
+
+            _writer.WriteBlankLine();
+        }       
+        public void Xor(Register in1, Register in2, Register output)
+        {
+            _writer.WriteComment($"xor {in1}, {in2} --> {output}");
+            _writer.WriteOp(Opcode.Xor);
+            _writer.WriteReg(in1);
+            _writer.WriteReg(output);
+            _writer.WritePaddingByte();
 
             _writer.WriteBlankLine();
         }
