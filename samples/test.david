@@ -5,7 +5,7 @@
 val 11 --> r1 
 
 val 0 --> r4
-add r6 r4 --> r2 // r6--> r2, rip is before current instruction  $$$, rIP
+add rIP r4 --> r2 // r6--> r2, rip is before current instruction
 
 jmp Func1
 
@@ -23,12 +23,12 @@ exit
 // return address in in r2
 Func1:
 
-add r1 r1 --> r3
+    add r1 r1 --> r3
 
-// Return 
-val 2 --> r1  // convention, 2 instructions later 
-add r2 r1 --> r2
-jmp r2
+    // Return 
+    val 8 --> r1  // convention, 2 instructions (8 bytes) later 
+    add r2 r1 --> r2
+    jmp r2
 
 
 

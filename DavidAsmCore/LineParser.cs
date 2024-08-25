@@ -79,32 +79,13 @@ namespace DavidAsmCore
 
         public Register GetRegister()
         {
-            var t = GetToken().ToLower();
+            var t = GetToken();
             return GetRegister(t);
         }
 
         public Register GetRegister(string t)
         {
-            if (t.Length < 2 || t[0] != 'r')
-            {
-                throw new InvalidOperationException($"Expected register, like `r#`.");
-            }
-
-            var t2 = t.Substring(1);
-            if (!int.TryParse(t2, out var regId))
-            {
-                throw new InvalidOperationException($"Expected regsiter, got '{t}'");
-            }
-
-            // 6 is IP. 
-
-            int maxReg = 6;
-            if (regId < 0 || regId > maxReg)
-            {
-                throw new InvalidOperationException($"Invalid register index. Only supports r1...r{maxReg}");
-            }
-
-            return new Register { Value = regId };
+            return Register.Parse(t);
         }
 
         // Will set one of hte overloads...
