@@ -1,0 +1,23 @@
+// abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*()-_=+[]{}|\;':",./<>?
+
+// init
+val 1000 --> r3
+
+// characters
+val 30 --> r1
+call WriteChar
+
+val 1 --> r1
+call WriteChar
+
+val 22 --> r1
+call WriteChar
+
+exit
+
+// subroutine
+WriteChar:
+{
+    mov r1 --> [r3]
+    add r3 2 --> r3
+}

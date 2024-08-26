@@ -104,7 +104,7 @@ namespace DavidAsmCore
         // Mov regSrc --> [AddressDest]
         public void MoveMemToReg(AddressSpec addrSource, Register regDest)
         {
-            _writer.WriteComment($"Mem {addrSource} --> {regDest}");
+            _writer.WriteComment($"mov {addrSource} --> {regDest}");
             
             if (addrSource is ConstantAddressSpec c1)
             {
@@ -131,7 +131,7 @@ namespace DavidAsmCore
         // Mov regSrc --> [regDst]
         public void MoveRegToMem(Register regSource, AddressSpec addrDest)
         {
-            _writer.WriteComment($"Mem {regSource} --> {addrDest}");
+            _writer.WriteComment($"mov {regSource} --> {addrDest}");
 
             if (addrDest is ConstantAddressSpec c2)
             {
