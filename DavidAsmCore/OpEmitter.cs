@@ -35,6 +35,10 @@ namespace DavidAsmCore
             _writer.WritePaddingByte();
         }
 
+        public void WriteComment(string comment)
+        {
+            _writer.WriteComment(comment);
+        }
 
         public void MarkLabel(Label label)        
         {
