@@ -30,3 +30,4 @@ This is an assembler for a [CPU emulator](https://scratch.mit.edu/projects/10591
 | `mov` | `reg1 --> [const]` | loads register value `reg1` into `[const]` in memory | 
 | `mov` | `reg1 --> [reg2]` | loads register value `reg1` into `[reg2]` in memory | 
 | label identifier | none | used in jumps, written as `label:` where "label" is the name | 
+| `call` | `label` | used for functions, `label` will have braces holding the code it contains | 
