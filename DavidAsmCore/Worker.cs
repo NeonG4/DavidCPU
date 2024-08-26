@@ -63,10 +63,25 @@ namespace DavidAsmCore
                 Label l = Label.New(labelName);
                 this._emitter.MarkLabel(l);
 
+                _lastLabel = l;
+
                 return true;
             }
 
             return false;
+        }
+
+        private Label? _lastLabel;
+
+        // Set if we're in the middle of a function
+        private FunctionDefinition _currentFunc;
+
+        public class FunctionDefinition
+        {
+            public Label _name; 
+
+            // Parameters?
+            // Local variables?
         }
 
         public void HandleLine(string line)
@@ -77,6 +92,43 @@ namespace DavidAsmCore
                 return;
             }
 
+            // Start of function
+            if (line[0] == '{')
+            {
+                // Must come immediately after a label. 
+                if (_lastLabel == null)
+                {
+                    throw new InvalidOperationException($"Function start '{{' must proceed a label.");
+                }
+                if (_currentFunc != null)
+                {
+                    throw new InvalidOperationException($"Can't define nested functions");
+                }
+                var funcDef = new FunctionDefinition
+                {
+                    _name = _lastLabel.Value
+                };
+
+                _lastLabel = null;
+                _currentFunc = funcDef;
+                return;
+            } 
+            else if (line[0] == '}') // end 
+            {
+                if (_currentFunc == null)
+                {
+                    throw new InvalidOperationException($"Must be inside a function to use '}}'");
+                }
+
+                // Emit return opcodes. 
+                _emitter.Add(Register.R5, 8, Register.R5);
+                _emitter.JumpReg(Register.R5);
+
+                _currentFunc = null;
+                return;
+            }
+
+            _lastLabel = null; // clear out. 
 
             var lp = new LineParser(line);
             var op = lp.GetOp();
@@ -269,6 +321,18 @@ namespace DavidAsmCore
 
                 case Opcode.Exit:
                     _emitter.Exit();
+                    break;
+
+                case Opcode.Call:
+                    {
+                        var label = lp.GetLabel();
+
+                        // add rIP +0 --> r5 
+                        // jmp Func1
+
+                        _emitter.Add(Register.RIP, 0, Register.R5);
+                        _emitter.JumpLabel(label);
+                    }
                     break;
 
                 default:

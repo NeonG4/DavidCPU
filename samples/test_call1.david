@@ -1,10 +1,10 @@
 
 // const 1000 --> _global1 
-declare _global; // compiler will allocate!!
+//declare _global; // compiler will allocate!!
 
 
 
-option 2b: Registers as args 
+// option 2b: Registers as args 
 
 // Callsite 
 // r3 := Func(11)
@@ -26,17 +26,13 @@ exit
 // arg1 is in r1
 // return address in in r2
 Func1:
+{
+    // R5 is the return address...
 
     // mov r1 --> [1000]
-    mov r1 --> [_global1]
+    //mov r1 --> [_global1]
 
     add r1 r1 --> r3
 
-    // Return 
-    return 
-
-
-
-
-
-
+    // Implicit Return 
+}

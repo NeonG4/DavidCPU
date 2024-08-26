@@ -33,11 +33,50 @@ namespace DavidAsmCore
 
         Exit = 0x20,
 
+        // Calls
+        Call = 1100,
+        
         // Overloads. 
         Mov_Overload = 1000,
         Mov_RCA = 0x41, // 0100 0001
         Mov_CRA = 0x42, // 0100 0010
         Mov_RCR = 0x43, // 0100 0011
         Mov_CRR = 0x44, // 0100 0100
+    }
+
+    public static class OpcodeHelper
+    {
+        private static readonly Dictionary<string, Opcode> _opcOdes = new Dictionary<string, Opcode>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "val", Opcode.Val },
+            { "add", Opcode.Add },
+            { "sub", Opcode.Sub },
+            { "mul", Opcode.Mul },
+            { "div", Opcode.Div },
+            { "and", Opcode.And },
+            { "or", Opcode.Or },
+            { "not", Opcode.Not },
+            { "nand", Opcode.Nand },
+            { "xor", Opcode.Xor },
+            { "exit", Opcode.Exit },
+
+            { "call", Opcode.Call },
+
+            { "jmp.if", Opcode.JumpIf },
+            { "jmp", Opcode.Jump_Overload},
+
+            { "mov", Opcode.Mov_Overload }
+        };
+
+        public static Opcode GetOp(string token)
+        {
+            // // if (!Enum.TryParse<Opcode>(token, ignoreCase: true, out var op))
+            if (!_opcOdes.TryGetValue(token, out var op))
+            {
+                throw new InvalidOperationException($"Expected opcode, got: {token}");
+            }
+
+            return op;
+        }
     }
 }

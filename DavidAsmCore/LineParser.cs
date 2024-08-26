@@ -152,37 +152,12 @@ namespace DavidAsmCore
             return Label.New(t); // will validate
         }
 
-        private readonly Dictionary<string, Opcode> _opcOdes = new Dictionary<string, Opcode>(StringComparer.OrdinalIgnoreCase)
-        {
-            { "val", Opcode.Val },
-            { "add", Opcode.Add },
-            { "sub", Opcode.Sub },
-            { "mul", Opcode.Mul },
-            { "div", Opcode.Div },
-            { "and", Opcode.And },
-            { "or", Opcode.Or },
-            { "not", Opcode.Not },
-            { "nand", Opcode.Nand },
-            { "xor", Opcode.Xor },
-            { "exit", Opcode.Exit },
-
-            { "jmp.if", Opcode.JumpIf },
-            { "jmp", Opcode.Jump_Overload},
-
-            { "mov", Opcode.Mov_Overload }
-        };
 
         public Opcode GetOp()
         {
             var token = GetToken();
 
-            // // if (!Enum.TryParse<Opcode>(token, ignoreCase: true, out var op))
-            if (!_opcOdes.TryGetValue(token, out var op))            
-            {
-                throw new InvalidOperationException($"Expected opcode, got: {token}");
-            }
-
-            return op;
+            return OpcodeHelper.GetOp(token);
         }
     }
 }
