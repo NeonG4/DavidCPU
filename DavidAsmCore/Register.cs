@@ -50,8 +50,8 @@ namespace DavidAsmCore
             }
 
             // 6 is IP. 
-
-            int maxReg = 5;
+            // R5 is reserver for stack ... don't allow referencing it. 
+            int maxReg = 4;
             if (regId < 0 || regId > maxReg)
             {
                 throw new InvalidOperationException($"Invalid register index. Only supports r1...r{maxReg}");

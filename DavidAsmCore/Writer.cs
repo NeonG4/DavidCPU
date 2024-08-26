@@ -17,6 +17,12 @@ namespace DavidAsmCore
         // Mapping of annotations ahead of each byte offset. 
         private Dictionary<int, StringBuilder> _annotations = new Dictionary<int, StringBuilder>();
 
+        // Map of label to where it's used. 
+        private readonly Dictionary<Label, List<int>> _touchUps = new Dictionary<Label, List<int>>();
+
+        // Track map of labels to their offets. 
+        private readonly Dictionary<Label, int> _labelOffsets = new Dictionary<Label, int>();
+
         public Writer()
         {
         }
@@ -25,7 +31,6 @@ namespace DavidAsmCore
         public void WriteToFile(TextWriter output, bool compact=false)
         {
             ApplyTouchups();
-
 
             // foreach(var b in _bytes)
             for(var i = 0; i < _bytes.Count; i++)
@@ -138,12 +143,6 @@ namespace DavidAsmCore
             // Placeholder to fill in later. 
             this.WriteI16(0);
         }
-
-        // Map of label to where it's used. 
-        private readonly Dictionary<Label, List<int>> _touchUps = new Dictionary<Label, List<int>>();
-        
-        // Track map of labels to their offets. 
-        private readonly Dictionary<Label, int> _labelOffsets = new Dictionary<Label, int>();
 
         public void ApplyTouchups()
         {

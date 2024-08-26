@@ -25,6 +25,11 @@ namespace DavidAsmCore
 
         public void Work(IEnumerable<string> lines)
         {
+            // Console is: 1000... 1594   // 27*11, 2 bytes per char
+
+            // Preemable. Allocate the stack.  $$$ - this should be a touchup. 
+            _emitter.LoadConstant(1600, Register.R5);
+
             foreach(var line in lines)
             {
                 // ignore comments or blank lines 
@@ -121,7 +126,11 @@ namespace DavidAsmCore
                 }
 
                 // Emit return opcodes. 
-                _emitter.Add(Register.R5, 8, Register.R5);
+                //_emitter.Add(Register.R5, 8, Register.R5);
+
+                _emitter.WriteComment($"{_currentFunc._name} return.");
+                EmitPop(Register.R5);
+                _emitter.Add(Register.R5, 12, Register.R5);
                 _emitter.JumpReg(Register.R5);
 
                 _currentFunc = null;
@@ -330,7 +339,10 @@ namespace DavidAsmCore
                         // add rIP +0 --> r5 
                         // jmp Func1
 
-                        _emitter.Add(Register.RIP, 0, Register.R5);
+                        // _emitter.Add(Register.RIP, 0, Register.R5);
+                        _emitter.WriteComment($"Call {label}.");
+                        EmitPush(Register.RIP);
+
                         _emitter.JumpLabel(label);
                     }
                     break;
@@ -341,6 +353,27 @@ namespace DavidAsmCore
 
             // Ensure end of line 
             lp.IsEOL();
+        }
+
+        // Using R5 as the stack pointer.
+        // Preemable must set R5....  $$$
+
+        private readonly RegisterAddressSpec _stackAddr = new RegisterAddressSpec { Register = Register.R5 };
+
+        // Emit pushing a register onto the stack
+        private void EmitPush(Register r)
+        {
+            _emitter.WriteComment($"Push {r}");
+            _emitter.MoveRegToMem(r, _stackAddr);
+            _emitter.Add(Register.R5, 1, Register.R5);
+        }
+
+        // Pop a value and save to the register. 
+        private void EmitPop(Register r)
+        {
+            _emitter.WriteComment($"Pop {r}");
+            _emitter.Add(Register.R5, -1, Register.R5);
+            _emitter.MoveMemToReg(_stackAddr, r);            
         }
     }
 }
