@@ -31,3 +31,15 @@ This is an assembler for a [CPU emulator](https://scratch.mit.edu/projects/10591
 | `mov` | `reg1 --> [reg2]` | loads register value `reg1` into `[reg2]` in memory | 
 | label identifier | none | used in jumps, written as `label:` where "label" is the name | 
 | `call` | `label` | used for functions, `label` will have braces holding the code it contains | 
+
+### Memory Mapped IO
+
+There is an MMIO from memory address __1000__ to memory address __1594__. Each character is two bytes. Encoding is based on 
+
+"__abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\`~!@#$%^&*()-_=+[]{}|\\;':",./<>?__"
+
+ For example, __a__ is encoded as `1`, wereas __A__ is encoded as `27`. The console is 27x11 characters. 
+
+*Be aware! Each character takes two bytes in memory.*
+
+Note: Space is encoded as the value `0`. The console is filled with the space character in default. 
