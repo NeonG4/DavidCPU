@@ -93,6 +93,17 @@ namespace DavidAsmCore
             this.WriteByte((byte)(num & 0xFF));
         }
 
+        // Signed 8-bit number
+        public void WriteI8(int num)
+        {
+            if (num > 127 || num < -128)
+            {
+                throw new InvalidOperationException($"Overflow: {num}");
+            }
+
+            this.WriteByte((byte)(num & 0xFF));
+        }
+
         public void WriteByte(byte b)
         {
             _bytes.Add(b);

@@ -161,6 +161,19 @@ namespace DavidAsmCore
 
             _writer.WriteBlankLine();
         }
+
+        public void Add(Register in1, int value, Register output)
+        {
+            _writer.WriteComment($"add {in1}, {value} --> {output}");
+            
+            _writer.WriteOp(Opcode.AddImmediate);
+            _writer.WriteReg(in1);
+            _writer.WriteI8(value);
+            _writer.WriteReg(output);
+
+            _writer.WriteBlankLine();
+        }
+
         public void Sub(Register in1, Register in2, Register output)
         {
             _writer.WriteComment($"sub {in1}, {in2} --> {output}");

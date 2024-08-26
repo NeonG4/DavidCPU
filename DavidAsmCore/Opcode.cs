@@ -14,6 +14,7 @@ namespace DavidAsmCore
     {
         Val = 0x40,
         Add = 0x10,
+        AddImmediate = 0x1C,
         Sub = 0x11,
         Mul = 0x12,
         Div = 0x13,

@@ -88,6 +88,19 @@ namespace DavidAsmCore
             return Register.Parse(t);
         }
 
+        // Expect either a register or a number literal. 
+        public object GetRegisterOrNumber()
+        {
+            var t = GetToken();
+
+            if (int.TryParse(t, out var number))
+            {
+                return number;
+            }
+
+            return GetRegister(t);
+        }
+
         // Will set one of hte overloads...
         // [1234]  // literal address
         // [r1] // address specified by register 

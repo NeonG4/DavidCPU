@@ -20,10 +20,12 @@ namespace DavidAsm
 
             var w = new Worker();
 
-            var lines = File.ReadLines(@"C:\Users\david\dev\DavidCPU\samples\test2.david");
+            var path = args[0];
+
+            var lines = File.ReadLines(path);
 
             w.Work(lines);
-            w.WriteToFile(Console.Out, compact: true);
+            w.WriteToFile(Console.Out, compact: false);
 
             // w.HandleLine("add r1 r2 --> r3");
         }

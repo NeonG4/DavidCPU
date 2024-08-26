@@ -3,3 +3,6 @@ obj
 debug
 release
 .vs
+
+launchSettings.json
+

@@ -1,18 +1,17 @@
 
-// - load params
-// - invoke the call 
-// - read the params 
-// - local variable 
-// - return back 
+// const 1000 --> _global1 
+declare _global; // compiler will allocate!!
 
+
+
+option 2b: Registers as args 
 
 // Callsite 
 // r3 := Func(11)
 val 11 --> r1 
 
-add rIP +0 --> r2 // r6--> r2, rip is before current instruction
-
-jmp Func1
+// r1...r4 are untouched 
+call Func1
 
 // Func sets return value in r3
 
@@ -28,11 +27,15 @@ exit
 // return address in in r2
 Func1:
 
+    // mov r1 --> [1000]
+    mov r1 --> [_global1]
+
     add r1 r1 --> r3
 
     // Return 
-    add r2 +8  --> r2
-    jmp r2
+    return 
+
+
 
 
 

@@ -93,14 +93,28 @@ namespace DavidAsmCore
                     }
                     break;
 
+                // Add r1 r2 --> R3
+                // Add r1 number --> R3
                 case Opcode.Add:
                     {
                         Register in1 = lp.GetRegister();
-                        Register in2 = lp.GetRegister();
+
+                        object arg2 = lp.GetRegisterOrNumber();                       
+                        
                         lp.GetArrow();
                         Register regOutput = lp.GetRegister();
 
-                        _emitter.Add(in1, in2, regOutput);
+                        if (arg2 is Register r2)
+                        {
+                            _emitter.Add(in1, r2, regOutput);
+                        } else if (arg2 is int num2)
+                        {
+                            _emitter.Add(in1, num2, regOutput);
+                        } else
+                        {
+                            // compiler should have blocked
+                            throw new NotImplementedException($"should happen");
+                        }
                     }
                     break;
                 case Opcode.Sub:
