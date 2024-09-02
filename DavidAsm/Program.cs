@@ -25,7 +25,7 @@ namespace DavidAsm
             var lines = File.ReadLines(@"C:\Users\david\dev\DavidCPU\samples\ConsoleLib.david");
 
             w.Work(lines);
-            w.WriteToFile(Console.Out, compact: false);
+            w.WriteToFile(Console.Out, compact: true);
 
             // w.HandleLine("add r1 r2 --> r3");
         }
