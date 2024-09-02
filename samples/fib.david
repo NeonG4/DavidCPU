@@ -11,13 +11,14 @@ function main()
     call fib 4 --> r4
 }
 
-function fib(n)
+function fib(n) // N: R5-6
 {
-    variable f1
-    variable f2
+    variable f1 // R5-4
+    variable f2 // R5-2
     
     // Base condition 
     // if n = 0, return 0
+    // mov [r5-6] --> r1  ,  -6 is address of N
     mov n --> r1
 
     // if r1 > 0, goto KeepGoing 
@@ -30,7 +31,7 @@ function fib(n)
 KeepGoing:    
     add r1 -1 --> r1
     call fib r1  --> r4 // $$$ Move f1?
-    mov r4 --> f1
+    mov r4 --> f1 // r4 --> [r5-2]
 
     mov n --> r1
     add r1 -2 --> r1
