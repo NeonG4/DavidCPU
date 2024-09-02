@@ -27,7 +27,7 @@ namespace DavidAsmCore
 
         public static bool IsValid(string name)
         {
-            var r = new Regex(@"^[A-Za-z0-9]+$");
+            var r = new Regex(@"^[_A-Za-z0-9]+$");
             if (r.IsMatch(name))
             {
                 return true;

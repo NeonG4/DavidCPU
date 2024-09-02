@@ -35,6 +35,8 @@ namespace DavidAsmCore
 
         // Calls
         Call = 1100,
+        Function = 1101,
+        Variable = 1102,
         
         // Overloads. 
         Mov_Overload = 1000,
@@ -42,6 +44,8 @@ namespace DavidAsmCore
         Mov_CRA = 0x42, // 0100 0010
         Mov_RCR = 0x43, // 0100 0011
         Mov_CRR = 0x44, // 0100 0100
+
+        
     }
 
     public static class OpcodeHelper
@@ -61,6 +65,8 @@ namespace DavidAsmCore
             { "exit", Opcode.Exit },
 
             { "call", Opcode.Call },
+            { "function", Opcode.Function },
+            { "variable", Opcode.Variable },
 
             { "jmp.if", Opcode.JumpIf },
             { "jmp", Opcode.Jump_Overload},

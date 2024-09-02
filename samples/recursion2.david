@@ -1,0 +1,32 @@
+// Basic recusion test 
+
+val 10 --> r2 // accumulator
+
+// constant, register, memory address
+call Recursion1(r1)
+
+exit
+
+Recursion1(param1):
+{
+    // Param1 is in R1 
+    mov param1 --> r1
+
+    add r2 r1 --> r2
+
+    add r1 -1 --> r1
+    mov r1 --> param1
+    
+    // goto Done if r1 > 0
+    // goto Done if r1 = 0
+
+    // if r1 > 0, goto Done 
+    jmp.if KeepGoing r1 
+    
+    jmp Done 
+KeepGoing: 
+    call Recursion1(param1)
+   
+Done:
+
+}

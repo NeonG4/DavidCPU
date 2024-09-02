@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices.Marshalling;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -12,6 +13,9 @@ namespace DavidAsmCore
     public class Worker
     {
         private readonly OpEmitter _emitter;
+
+        private readonly Dictionary<Label, FunctionDefinition> _functionDefinitions = new Dictionary<Label, FunctionDefinition>();
+
 
         public Worker()
         {
@@ -23,37 +27,139 @@ namespace DavidAsmCore
             _emitter.WriteToFile(textWriter, compact);
         }
 
-        public void Work(IEnumerable<string> lines)
+        private FunctionDefinition ParseFunctionSignature(string line)
         {
-            // Console is: 1000... 1594   // 27*11, 2 bytes per char
+            // function Name(param1,param2,param3)
 
-            // Preemable. Allocate the stack.  $$$ - this should be a touchup. 
-            _emitter.LoadConstant(1600, Register.R5);
+            var l2 = line.Substring("function ".Length).Trim();
 
-            foreach(var line in lines)
+            int iLeft = l2.IndexOf('(');
+            int iRight = l2.IndexOf(')');
+            if (iRight != l2.Length-1)
             {
-                // ignore comments or blank lines 
-                if (line.Trim().StartsWith("//"))
-                {                    
-                    continue;
+                throw new InvalidOperationException($"Function declaration should end in ')'");
+            }
+
+            string name = l2.Substring(0, iLeft).Trim();
+            
+            string args = l2.Substring(iLeft+1, iRight-iLeft-1);
+
+            var funcDef = new FunctionDefinition
+            {
+                 _name = Label.New(name)
+            };
+
+            if (!string.IsNullOrWhiteSpace(args))
+            {
+                var parts = args.Split(',');
+                foreach(var part in parts)
+                {
+                    var paramName = Label.New(part.Trim());
+                    funcDef._paramNames.Add(paramName);
+                }
+            }
+
+            return funcDef;
+        }
+
+        // Populate definitions. 
+        private void ScanDefinitions(IEnumerable<string> lines)
+        {
+            FunctionDefinition currentDef = null;
+
+            foreach(var line2 in lines)
+            {
+                var line = line2.Trim();
+
+                var idxComment = line.IndexOf("//");
+                if (idxComment >= 0)
+                {
+                    line = line.Substring(0, idxComment).Trim();
                 }
 
                 if (string.IsNullOrWhiteSpace(line))
                 {
                     continue;
                 }
+                
+                // function Name(param1, param2) 
+                if (line.StartsWith("function "))
+                {
+                    if (currentDef != null)
+                    {
+                        throw new InvalidOperationException($"Can't define nested functions");
+                    }
 
-                HandleLine(line);
+                    currentDef = ParseFunctionSignature(line);
+                    _functionDefinitions.Add(currentDef._name, currentDef);
+                }
+                else if (currentDef != null)
+                {
+                    // In middle of existing function 
+                    if (line[0] == '{')
+                    {
+                        // $$$ ensure this is next token. 
+                    }
+                    else if (line[0] == '}')
+                    {
+                        currentDef = null; 
+                    } else
+                    {
+                        if (line.StartsWith("variable "))
+                        {
+                            var parts = line.Split(" ");
+                            var varName = parts[1];
+                            currentDef._localNames.Add(Label.New(varName));
+                        }
+                        else
+                        {
+                            // Body of function
+                            currentDef._body.Add(line);
+                        }
+                    }
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Illegal top-level statement: {line}");
+                }
+            }
+
+            // ensure terminated
+            if (currentDef != null)
+            {
+                throw new InvalidOperationException($"Unterminated function. Missing closing '}}'");
+            }
+        }
+
+        public void Work(IEnumerable<string> lines)
+        {
+            ScanDefinitions(lines);
+
+            // Console is: 1000... 1594   // 27*11, 2 bytes per char
+
+            // Preemable. Allocate the stack.  $$$ - this should be a touchup. 
+            _emitter.LoadConstant(1600, Register.R5);
+
+
+            foreach(var funcDef in  _functionDefinitions.Values) 
+            {
+                foreach (var line in funcDef._body)
+                {
+                    HandleLine(line);
+                }
+
             }
 
             // End of Program. 
             _emitter.Exit();
         }
 
+
+
         // Get label from:
         //   name:  
         //   name:  // comment 
-        private readonly Regex _regExLabelMatch = new Regex(@"^\s*([A-Za-z0-9]+?):\s*(//.*)?$");
+        private static readonly Regex _regExLabelMatch = new Regex(@"^\s*([A-Za-z0-9]+?):\s*(//.*)?$");
 
         // Labels are an identifier followed by a colon "Label:" 
         // Could have a comment after the ':'
@@ -68,27 +174,11 @@ namespace DavidAsmCore
                 Label l = Label.New(labelName);
                 this._emitter.MarkLabel(l);
 
-                _lastLabel = l;
-
                 return true;
             }
 
             return false;
         }
-
-        private Label? _lastLabel;
-
-        // Set if we're in the middle of a function
-        private FunctionDefinition _currentFunc;
-
-        public class FunctionDefinition
-        {
-            public Label _name; 
-
-            // Parameters?
-            // Local variables?
-        }
-
         public void HandleLine(string line)
         {
             // Does this declare a label?
@@ -96,48 +186,6 @@ namespace DavidAsmCore
             {
                 return;
             }
-
-            // Start of function
-            if (line[0] == '{')
-            {
-                // Must come immediately after a label. 
-                if (_lastLabel == null)
-                {
-                    throw new InvalidOperationException($"Function start '{{' must proceed a label.");
-                }
-                if (_currentFunc != null)
-                {
-                    throw new InvalidOperationException($"Can't define nested functions");
-                }
-                var funcDef = new FunctionDefinition
-                {
-                    _name = _lastLabel.Value
-                };
-
-                _lastLabel = null;
-                _currentFunc = funcDef;
-                return;
-            } 
-            else if (line[0] == '}') // end 
-            {
-                if (_currentFunc == null)
-                {
-                    throw new InvalidOperationException($"Must be inside a function to use '}}'");
-                }
-
-                // Emit return opcodes. 
-                //_emitter.Add(Register.R5, 8, Register.R5);
-                // Use R4 as a temp register. 
-                _emitter.WriteComment($"{_currentFunc._name} return.");
-                EmitPop(Register.R4);
-                _emitter.Add(Register.R4, 12, Register.R4);
-                _emitter.JumpReg(Register.R4);
-              
-                _currentFunc = null;
-                return;
-            }
-
-            _lastLabel = null; // clear out. 
 
             var lp = new LineParser(line);
             var op = lp.GetOp();
@@ -332,6 +380,7 @@ namespace DavidAsmCore
                     _emitter.Exit();
                     break;
 
+                // Call func(p1,p2,p3) --> r1
                 case Opcode.Call:
                     {
                         var label = lp.GetLabel();
