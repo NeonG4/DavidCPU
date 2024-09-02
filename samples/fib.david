@@ -1,14 +1,20 @@
 // Recursive fibonaci 
+// - parse call site ...
+//    - allow fib(arg1,arg2)
+//    - push params onto stack
+// - allow accessing params 
+// - locals 
 
 function main()
 {
-    call fib(4) --> r2
+    // $$$ Return value to r2 
+    call fib 4 --> r4
 }
 
 function fib(n)
 {
     variable f1
-    variable f1
+    variable f2
     
     // Base condition 
     // if n = 0, return 0
@@ -17,20 +23,28 @@ function fib(n)
     // if r1 > 0, goto KeepGoing 
     jmp.if KeepGoing r1
 
-    return 0
+    // return 0
+    val 0 --> r3
+    jmp Done
 
 KeepGoing:    
     add r1 -1 --> r1
-    call fib(r1) --> f1
+    call fib r1  --> r4 // $$$ Move f1?
+    mov r4 --> f1
 
     mov n --> r1
     add r1 -2 --> r1
-    call fib(r1) --> f2
+    call fib r1  --> r4
+    mov r4 --> f2
 
     mov f1 --> r1
     mov f1 --> r2
 
     add r1 r2 --> r3
 
-    return r3
+    // $$$ return a value 
+Done:    
+    // return r3
+    add r3 0 --> r4
 }
+

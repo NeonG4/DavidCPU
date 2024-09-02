@@ -135,23 +135,58 @@ namespace DavidAsmCore
         {
             ScanDefinitions(lines);
 
+            Console.WriteLine($"Function definitions:");
+
+            foreach (var def in this._functionDefinitions)
+            {
+                Console.WriteLine($"  {def.Value._name}");
+            }
+
             // Console is: 1000... 1594   // 27*11, 2 bytes per char
 
             // Preemable. Allocate the stack.  $$$ - this should be a touchup. 
             _emitter.LoadConstant(1600, Register.R5);
 
+            // Jump to main             
+            this._emitter.JumpLabel(Label.New("main"));
 
             foreach(var funcDef in  _functionDefinitions.Values) 
             {
+                this._emitter.MarkLabel(funcDef._name);
+
+                // Starting frame. Local variables. 
+                int numLocals = funcDef._localNames.Count;
+
+                _emitter.WriteComment($"Locals: {numLocals}");
+                _emitter.Add(Register.R5, numLocals*2, Register.R5);
+
+                // Body 
                 foreach (var line in funcDef._body)
                 {
-                    HandleLine(line);
+                    HandleLine(line, funcDef);
                 }
 
+
+                if (funcDef._name._name == "main")
+                {
+                    _emitter.Exit();
+                }
+                else
+                {
+                    // Emit return opcodes. 
+                    // Use R4 as a temp register. 
+                    _emitter.WriteComment($"{funcDef._name} return.");
+
+                    _emitter.Add(Register.R5, -numLocals * 2, Register.R5); // Free locals 
+
+                    EmitPop(Register.R4);
+                    _emitter.Add(Register.R4, 12, Register.R4);
+                    _emitter.JumpReg(Register.R4);
+                }
             }
 
             // End of Program. 
-            _emitter.Exit();
+            // _emitter.Exit();
         }
 
 
@@ -179,7 +214,7 @@ namespace DavidAsmCore
 
             return false;
         }
-        public void HandleLine(string line)
+        public void HandleLine(string line, FunctionDefinition currentFunc)
         {
             // Does this declare a label?
             if (HandleLabel(line))
@@ -349,6 +384,12 @@ namespace DavidAsmCore
 
                         if (arg1 is AddressSpec addr1)
                         {
+                            if (addr1 is StackAddressSpec s1)
+                            {
+                                // Resolve address offset...
+                                currentFunc.Resolve(s1);
+                            }
+
                             if (arg2 is Register reg2)
                             {
                                 _emitter.MoveMemToReg(addr1, reg2);
@@ -361,6 +402,12 @@ namespace DavidAsmCore
                         {
                             if (arg2 is AddressSpec addr2)
                             {
+                                if (addr2 is StackAddressSpec s2)
+                                {
+                                    // Resolve address offset...
+                                    currentFunc.Resolve(s2);
+                                }
+
                                 _emitter.MoveRegToMem(reg1, addr2);
                             }
                             else
@@ -385,12 +432,46 @@ namespace DavidAsmCore
                     {
                         var label = lp.GetLabel();
 
+                        // Lokup func...
+                        if (!this._functionDefinitions.TryGetValue(label, out var func))
+                        {
+                            throw new InvalidOperationException($"Function {label} isn't defined.");
+                        }
+
                         // add rIP +0 --> r5 
                         // jmp Func1
 
                         // _emitter.Add(Register.RIP, 0, Register.R5);
                         _emitter.WriteComment($"Call {label}.");
                         EmitPush(Register.RIP);
+
+                        // Push args...  $$$ Put this in a single CallSite 
+                        var args = lp.GetArgs();
+
+                        // Verify arg count matches 
+                        int expectedCount = func._paramNames.Count;
+                        int actualCount = args.Length;
+                        if (expectedCount != actualCount)
+                        {
+                            throw new InvalidOperationException($"{label} expected {expectedCount}, actual {actualCount}");
+                        }
+
+                        var retAddr = lp.GetRegister();
+
+                        foreach(var arg in args)
+                        {
+                            if (arg is int num)
+                            {
+                                _emitter.LoadConstant((short) num, Register.R4);
+                                this.EmitPush(Register.R4);
+                            } else if (arg is Register r)
+                            {
+                                this.EmitPush(r);
+                            } else
+                            {
+                                throw new InvalidOperationException($"Unexpected call arg");
+                            }
+                        }
 
                         _emitter.JumpLabel(label);
                     }
@@ -412,27 +493,18 @@ namespace DavidAsmCore
         // Emit pushing a register onto the stack
         private void EmitPush(Register r)
         {
-            if (r.Value == Register.R5.Value)
-            {
-                throw new InvalidOperationException($"Can't push R5 since it's the stack register.");
-            }
-
             _emitter.WriteComment($"Push {r}");
             _emitter.MoveRegToMem(r, _stackAddr);
-            _emitter.Add(Register.R5, 2, Register.R5); // each stack item is two bytes
+            _emitter.Add(Register.R5, 2, Register.R5);
         }
 
         // Pop a value and save to the register. 
         private void EmitPop(Register r)
         {
-            if (r.Value == Register.R5.Value)
-            {
-                throw new InvalidOperationException($"Can't pop to R5 since it's the stack register.");
-            }
-
             _emitter.WriteComment($"Pop {r}");
-            _emitter.Add(Register.R5, -2, Register.R5); // each stack item is two bytes
-            _emitter.MoveMemToReg(_stackAddr, r);
+            _emitter.Add(Register.R5, -2, Register.R5);
+            _emitter.MoveMemToReg(_stackAddr, r);            
         }
-    }
+    }    
 }
+ 

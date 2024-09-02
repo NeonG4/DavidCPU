@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -62,13 +63,40 @@ namespace DavidAsmCore
             }
         }
 
+        public bool IsArrow(string token)
+        {
+            return (token == "-->");
+        }
+
         public void GetArrow()
         {
             var t = GetToken();
-            if (t != "-->")
+            if (!IsArrow(t))
             {
                 throw new InvalidOperationException($"Expected '-->' operator");
             }
+        }
+
+        public object[] GetArgs()
+        {
+            var t = GetToken();
+
+            List<object> args = new List<object>();
+
+            while (true)
+            {
+                if (IsArrow(t) || (t == null))
+                {
+                    break;
+                }
+
+                var arg = GetRegisterOrNumber(t);
+                args.Add(arg);
+
+                t = GetToken();
+            }
+
+            return args.ToArray();
         }
 
         public Label GetLabel()
@@ -92,7 +120,11 @@ namespace DavidAsmCore
         public object GetRegisterOrNumber()
         {
             var t = GetToken();
+            return GetRegisterOrNumber(t);            
+        }
 
+        public object GetRegisterOrNumber(string t)
+        {
             if (int.TryParse(t, out var number))
             {
                 return number;
@@ -105,7 +137,7 @@ namespace DavidAsmCore
         // [1234]  // literal address
         // [r1] // address specified by register 
         // r1 // direct register 
-       
+
         // Returns a AddressSpec or Register
         public object GetAddressOrRegister()
         {
@@ -134,7 +166,11 @@ namespace DavidAsmCore
                 return reg;
             }
 
-            throw new InvalidOperationException($"Must be a register or an address (enclosed in [ ... ]).");
+            // Is it a symbol? 
+            var l = Label.New(t); // will validate
+            return new StackAddressSpec {  _name = l };
+
+            // throw new InvalidOperationException($"Must be a register or an address (enclosed in [ ... ]).");
         }
 
 

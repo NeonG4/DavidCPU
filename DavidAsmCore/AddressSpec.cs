@@ -34,4 +34,34 @@ namespace DavidAsmCore
             return $"[{Register}]";
         }
     }
+    
+    // a symbol, could be a parameter/local (from the stack) or a global 
+
+    public class StackAddressSpec : AddressSpec
+    {
+        public Label _name;
+
+        // Must be resolved. 
+        // Offset relative to stack. 
+        private int _offset = int.MaxValue;
+
+        public void SetOffset(int offset)
+        {
+            _offset = offset;
+        }
+
+        public int GetOffset()
+        {
+            if (_offset == int.MaxValue)
+            {
+                throw new InvalidOperationException($"Offset isn't resolved yet!");
+            }
+            return _offset;
+        }
+
+        public override string ToString()
+        {
+            return $"[{_name} : R5 + {_offset}]";
+        }
+    }
 }

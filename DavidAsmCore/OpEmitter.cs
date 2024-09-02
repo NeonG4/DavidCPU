@@ -119,7 +119,16 @@ namespace DavidAsmCore
                 _writer.WriteReg(regDest);
                 _writer.WritePaddingByte();
             }
-            else
+            else if (addrSource is StackAddressSpec s1)
+            {
+                this.Add(Register.R5, s1.GetOffset(), Register.R4);
+
+                _writer.WriteOp(Opcode.Mov_RCR); // Ram-->CPU
+                _writer.WriteReg(Register.R4); // src 
+                _writer.WriteReg(regDest); // dest 
+                _writer.WritePaddingByte();
+            } 
+            else 
             {
                 throw new NotImplementedException($"Unrecognized address kind");
             }
@@ -144,6 +153,15 @@ namespace DavidAsmCore
                 _writer.WriteOp(Opcode.Mov_CRR); // CPU --> Ram                
                 _writer.WriteReg(regSource);
                 _writer.WriteReg(r2.Register);
+                _writer.WritePaddingByte();
+            }
+            else if (addrDest is StackAddressSpec s2)
+            {
+                this.Add(Register.R5, s2.GetOffset(), Register.R4);
+
+                _writer.WriteOp(Opcode.Mov_RCR); // Ram-->CPU
+                _writer.WriteReg(regSource);
+                _writer.WriteReg(Register.R4);
                 _writer.WritePaddingByte();
             }
             else

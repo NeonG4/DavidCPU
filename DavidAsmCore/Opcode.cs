@@ -37,6 +37,7 @@ namespace DavidAsmCore
         Call = 1100,
         Function = 1101,
         Variable = 1102,
+        Return = 1103,
         
         // Overloads. 
         Mov_Overload = 1000,
@@ -65,6 +66,7 @@ namespace DavidAsmCore
             { "exit", Opcode.Exit },
 
             { "call", Opcode.Call },
+            { "return", Opcode.Return },
             { "function", Opcode.Function },
             { "variable", Opcode.Variable },
 

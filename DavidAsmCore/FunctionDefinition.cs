@@ -16,6 +16,8 @@ namespace DavidAsmCore
         // $$$ Need to track storage for each... Stack slot....
         // positional args, used to push... 
 
+        // $$$ detect collisions. 
+
         public List<Label> _paramNames = new List<Label>();
 
         public List<Label> _localNames = new List<Label>();
@@ -26,6 +28,58 @@ namespace DavidAsmCore
         public override string ToString()
         {
             return _name.ToString();
+        }
+
+        internal void Resolve(StackAddressSpec s1)
+        {
+#if false
+Stack frame looks like:
+    rip
+    p0
+    p1
+    p2
+    l0
+    l1
+    l2 
+        <-- R5
+#endif
+            // Is it a local?
+            if (TryGetLocalIdx(s1._name, out var idx))
+            {
+                s1.SetOffset((0 - _localNames.Count + idx) * 2);
+
+                return;
+            }
+
+            if (TryGetParamIdx(s1._name, out idx))
+            {
+                s1.SetOffset((0 - _localNames.Count - _paramNames.Count + idx) * 2);
+                return;
+            }
+
+            throw new InvalidOperationException($"Unrecognized symbol: {s1._name}");            
+        }
+
+        private bool TryGetLocalIdx(Label l, out int idx)
+        {
+            idx = _localNames.IndexOf(l);
+                        
+            if (idx >= 0)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private bool TryGetParamIdx(Label l, out int idx)
+        {
+            idx = _paramNames.IndexOf(l);
+
+            if (idx >= 0)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }
