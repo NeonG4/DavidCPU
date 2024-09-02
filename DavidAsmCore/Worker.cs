@@ -127,13 +127,12 @@ namespace DavidAsmCore
 
                 // Emit return opcodes. 
                 //_emitter.Add(Register.R5, 8, Register.R5);
-
                 // Use R4 as a temp register. 
                 _emitter.WriteComment($"{_currentFunc._name} return.");
                 EmitPop(Register.R4);
                 _emitter.Add(Register.R4, 12, Register.R4);
                 _emitter.JumpReg(Register.R4);
-
+              
                 _currentFunc = null;
                 return;
             }

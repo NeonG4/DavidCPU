@@ -20,9 +20,9 @@ namespace DavidAsm
 
             var w = new Worker();
 
-            var path = args[0];
+            //var path = args[0];
 
-            var lines = File.ReadLines(path);
+            var lines = File.ReadLines(@"C:\Users\david\dev\DavidCPU\samples\ConsoleLib.david");
 
             w.Work(lines);
             w.WriteToFile(Console.Out, compact: false);
