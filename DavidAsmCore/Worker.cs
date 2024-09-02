@@ -371,7 +371,7 @@ namespace DavidAsmCore
 
             _emitter.WriteComment($"Push {r}");
             _emitter.MoveRegToMem(r, _stackAddr);
-            _emitter.Add(Register.R5, 1, Register.R5);
+            _emitter.Add(Register.R5, 2, Register.R5); // each stack item is two bytes
         }
 
         // Pop a value and save to the register. 
@@ -383,8 +383,8 @@ namespace DavidAsmCore
             }
 
             _emitter.WriteComment($"Pop {r}");
-            _emitter.Add(Register.R5, -1, Register.R5);
-            _emitter.MoveMemToReg(_stackAddr, r);            
+            _emitter.Add(Register.R5, -2, Register.R5); // each stack item is two bytes
+            _emitter.MoveMemToReg(_stackAddr, r);
         }
     }
 }
