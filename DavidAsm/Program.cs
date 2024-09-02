@@ -22,7 +22,7 @@ namespace DavidAsm
 
             //var path = args[0];
 
-            var lines = File.ReadLines(@"C:\Users\david\dev\DavidCPU\samples\ConsoleLib.david");
+            var lines = File.ReadLines(@"C:\dev\DavidCPU\samples\fib.david");
 
             w.Work(lines);
             w.WriteToFile(Console.Out, compact: false);

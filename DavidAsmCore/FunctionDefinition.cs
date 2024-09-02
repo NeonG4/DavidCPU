@@ -34,26 +34,26 @@ namespace DavidAsmCore
         {
 #if false
 Stack frame looks like:
-    rip
     p0
     p1
     p2
     l0
     l1
     l2 
+    rip
         <-- R5
 #endif
             // Is it a local?
             if (TryGetLocalIdx(s1._name, out var idx))
             {
-                s1.SetOffset((0 - _localNames.Count + idx) * 2);
+                s1.SetOffset((0 - _localNames.Count + idx - 1) * 2);
 
                 return;
             }
 
             if (TryGetParamIdx(s1._name, out idx))
             {
-                s1.SetOffset((0 - _localNames.Count - _paramNames.Count + idx) * 2);
+                s1.SetOffset((0 - _localNames.Count - _paramNames.Count + idx - 1) * 2);
                 return;
             }
 

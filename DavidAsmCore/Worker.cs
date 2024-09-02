@@ -443,8 +443,7 @@ namespace DavidAsmCore
 
                         // _emitter.Add(Register.RIP, 0, Register.R5);
                         _emitter.WriteComment($"Call {label}.");
-                        EmitPush(Register.RIP);
-
+                        
                         // Push args...  $$$ Put this in a single CallSite 
                         var args = lp.GetArgs();
 
@@ -473,6 +472,9 @@ namespace DavidAsmCore
                             }
                         }
 
+                        // Push address last so that we have a stable way to compute return offset. 
+                        EmitPush(Register.RIP);
+
                         _emitter.JumpLabel(label);
                     }
                     break;
@@ -493,6 +495,11 @@ namespace DavidAsmCore
         // Emit pushing a register onto the stack
         private void EmitPush(Register r)
         {
+            if (r.Value == Register.R5.Value)
+            {
+                throw new InvalidOperationException($"Can't push R5 since it's the stack register.");
+            }
+
             _emitter.WriteComment($"Push {r}");
             _emitter.MoveRegToMem(r, _stackAddr);
             _emitter.Add(Register.R5, 2, Register.R5);
@@ -501,6 +508,11 @@ namespace DavidAsmCore
         // Pop a value and save to the register. 
         private void EmitPop(Register r)
         {
+            if (r.Value == Register.R5.Value)
+            {
+                throw new InvalidOperationException($"Can't pop to R5 since it's the stack register.");
+            }
+
             _emitter.WriteComment($"Pop {r}");
             _emitter.Add(Register.R5, -2, Register.R5);
             _emitter.MoveMemToReg(_stackAddr, r);            
