@@ -412,7 +412,16 @@ namespace DavidAsmCore
 
                                 _emitter.MoveRegToMem(reg1, addr2);
                             }
-                            else
+                            else if (arg2 is Register reg2)
+                            {
+                                // encode:
+                                //   mov r1 --> r2
+                                // as: 
+                                //   add r1 0 --> r2
+
+                                _emitter.Add(reg1, 0, reg2);
+                            } 
+                            else 
                             {
                                 throw new InvalidOperationException($"First argument is an register, so second arg must be an address.");
                             }

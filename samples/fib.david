@@ -6,7 +6,7 @@
 // - locals 
 
 function main()
-{
+{    
     // $$$ Return value to r2 
     call fib 4 --> r4
 }
@@ -46,6 +46,6 @@ KeepGoing:
     // $$$ return a value 
 Done:    
     // return r3
-    add r3 0 --> r4
+    mov r3 --> r4
 }
 
