@@ -11,6 +11,12 @@ namespace DavidAsmCore
     /// </summary>
     public class FunctionDefinition
     {
+        /// <summary>
+        /// Name of the main() function. This is the entry point 
+        /// and all programs should have this. 
+        /// </summary>
+        public static string Main = "main";
+
         public Label _name;
 
         // $$$ Need to track storage for each... Stack slot....
@@ -18,9 +24,36 @@ namespace DavidAsmCore
 
         // $$$ detect collisions. 
 
-        public List<Label> _paramNames = new List<Label>();
+        private List<Label> _paramNames = new List<Label>();
 
-        public List<Label> _localNames = new List<Label>();
+        private List<Label> _localNames = new List<Label>();
+
+        // collision detection
+        private HashSet<Label> _names = new HashSet<Label>();
+
+        public void AddParam(Label name)
+        {
+            if (!_names.Add(name))
+            {
+                throw new InvalidOperationException($"{name} is already defined.");
+            }
+
+            _paramNames.Add(name);
+        }
+
+        public void AddLocal(Label name)
+        {
+            if (!_names.Add(name))
+            {
+                throw new InvalidOperationException($"{name} is already defined.");
+            }
+
+            _localNames.Add(name);
+        }
+
+        public int ParamCount => _paramNames.Count();
+
+        public int LocalCount => _localNames.Count();
 
         // body. Used in 2nd pass for compilation.  
         public List<string> _body = new List<string>();

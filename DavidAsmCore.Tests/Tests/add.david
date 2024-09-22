@@ -1,9 +1,11 @@
 
-// Adds 2 numbers
-val 10 --> r1
+function main()
+{
+	// Adds 2 numbers
+	val 10 --> r1
 
-val 20 --> r2
+	val 20 --> r2
 
-add r1 r2 --> r3
-
+	add r1 r2 --> r3
+}
 

@@ -23,7 +23,11 @@ namespace DavidAsmCore
         public static Register R1 = new Register { Value = 1 };
         public static Register R2 = new Register { Value = 2 };
         public static Register R3 = new Register { Value = 3 };
+
+        // Convention is to use R4 as a "temp" register for compiler operations. 
         public static Register R4 = new Register { Value = 4 };
+
+        // Convention is to use r4 as stack pointer
         public static Register R5 = new Register { Value = 5 };
 
         // Register 6 is the instruction pointer. 

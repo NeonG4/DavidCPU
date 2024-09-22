@@ -27,7 +27,9 @@ namespace DavidAsmCore
             _emitter.WriteToFile(textWriter, compact);
         }
 
-        private FunctionDefinition ParseFunctionSignature(string line)
+        // Assumes caller has stripped comments. 
+        //  function  func(p1, p2)
+        public FunctionDefinition ParseFunctionSignature(string line)
         {
             // function Name(param1,param2,param3)
 
@@ -55,7 +57,7 @@ namespace DavidAsmCore
                 foreach(var part in parts)
                 {
                     var paramName = Label.New(part.Trim());
-                    funcDef._paramNames.Add(paramName);
+                    funcDef.AddParam(paramName);
                 }
             }
 
@@ -109,7 +111,7 @@ namespace DavidAsmCore
                         {
                             var parts = line.Split(" ");
                             var varName = parts[1];
-                            currentDef._localNames.Add(Label.New(varName));
+                            currentDef.AddLocal(Label.New(varName));
                         }
                         else
                         {
@@ -148,14 +150,14 @@ namespace DavidAsmCore
             _emitter.LoadConstant(1600, Register.R5);
 
             // Jump to main             
-            this._emitter.JumpLabel(Label.New("main"));
+            this._emitter.JumpLabel(Label.New(FunctionDefinition.Main));
 
             foreach(var funcDef in  _functionDefinitions.Values) 
             {
                 this._emitter.MarkLabel(funcDef._name);
 
                 // Starting frame. Local variables. 
-                int numLocals = funcDef._localNames.Count;
+                int numLocals = funcDef.LocalCount;
 
                 _emitter.WriteComment($"Locals: {numLocals}");
                 _emitter.Add(Register.R5, numLocals*2, Register.R5);
@@ -167,7 +169,7 @@ namespace DavidAsmCore
                 }
 
 
-                if (funcDef._name._name == "main")
+                if (funcDef._name._name == FunctionDefinition.Main)
                 {
                     _emitter.Exit();
                 }
@@ -448,7 +450,7 @@ namespace DavidAsmCore
                         var args = lp.GetArgs();
 
                         // Verify arg count matches 
-                        int expectedCount = func._paramNames.Count;
+                        int expectedCount = func.ParamCount;
                         int actualCount = args.Length;
                         if (expectedCount != actualCount)
                         {
