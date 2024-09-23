@@ -16,6 +16,7 @@ namespace DavidAsmCore
     // Constant memory address, like [1234]
     public class ConstantAddressSpec : AddressSpec
     {
+        // David CPU uses 1-based addressing. 
         public int Address { get; set; }
 
         public override string ToString()

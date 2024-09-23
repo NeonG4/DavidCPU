@@ -16,6 +16,7 @@ namespace DavidAsmCore
 
         private readonly Dictionary<Label, FunctionDefinition> _functionDefinitions = new Dictionary<Label, FunctionDefinition>();
 
+        private readonly Dictionary<Label, VariableDefinition> _globals = new Dictionary<Label, VariableDefinition>();
 
         public Worker()
         {
@@ -64,6 +65,21 @@ namespace DavidAsmCore
             return funcDef;
         }
 
+        // return true if this line declares a variable 
+        private bool TryParseVar(string line, out Label label)
+        {
+            if (line.StartsWith("variable "))
+            {
+                var parts = line.Split(" ");
+                var varName = parts[1];
+                label = Label.New(varName);
+                return true;
+            }
+
+            label = default;
+            return false;
+        }
+
         // Populate definitions. 
         private void ScanDefinitions(IEnumerable<string> lines)
         {
@@ -83,20 +99,34 @@ namespace DavidAsmCore
                 {
                     continue;
                 }
-                
-                // function Name(param1, param2) 
-                if (line.StartsWith("function "))
-                {
-                    if (currentDef != null)
-                    {
-                        throw new InvalidOperationException($"Can't define nested functions");
-                    }
 
-                    currentDef = ParseFunctionSignature(line);
-                    _functionDefinitions.Add(currentDef._name, currentDef);
-                }
+                if (currentDef == null)
+                {
+                    // At global scope 
+                    // function Name(param1, param2) 
+                    if (line.StartsWith("function "))
+                    {
+                        currentDef = ParseFunctionSignature(line);
+                        _functionDefinitions.Add(currentDef._name, currentDef);
+                    }
+                    else if (TryParseVar(line, out var globalVariable))
+                    {
+                        var def = new VariableDefinition { _name = globalVariable };
+                        _globals.Add(globalVariable, def);
+                    } 
+                    else
+                    {
+                        throw new InvalidOperationException($"Unrecognized statement at globals scope: {line}");
+                    }
+                }                
                 else if (currentDef != null)
                 {
+                    // function Name(param1, param2) 
+                    if (line.StartsWith("function "))
+                    {
+                        throw new InvalidOperationException($"Can't define nested functions");                        
+                    }
+
                     // In middle of existing function 
                     if (line[0] == '{')
                     {
@@ -104,14 +134,13 @@ namespace DavidAsmCore
                     }
                     else if (line[0] == '}')
                     {
-                        currentDef = null; 
-                    } else
+                        currentDef = null;
+                    }
+                    else
                     {
-                        if (line.StartsWith("variable "))
+                        if (TryParseVar(line, out var localVariable))
                         {
-                            var parts = line.Split(" ");
-                            var varName = parts[1];
-                            currentDef.AddLocal(Label.New(varName));
+                            currentDef.AddLocal(localVariable);
                         }
                         else
                         {
@@ -152,6 +181,18 @@ namespace DavidAsmCore
             // Jump to main             
             this._emitter.JumpLabel(Label.New(FunctionDefinition.Main));
 
+            // Space for globals.
+            _emitter.WriteComment("Globals");
+            foreach (var global in this._globals)
+            {
+                var address = _emitter.Alloc();
+                global.Value.address = address;
+
+                var name = global.Value._name._name;
+                _emitter.WriteComment($"  {name}: {address}");
+
+            }
+
             foreach(var funcDef in  _functionDefinitions.Values) 
             {
                 this._emitter.MarkLabel(funcDef._name);
@@ -160,7 +201,10 @@ namespace DavidAsmCore
                 int numLocals = funcDef.LocalCount;
 
                 _emitter.WriteComment($"Locals: {numLocals}");
-                _emitter.Add(Register.R5, numLocals*2, Register.R5);
+                if (numLocals != 0)
+                {
+                    _emitter.Add(Register.R5, numLocals * 2, Register.R5);
+                }
 
                 // Body 
                 foreach (var line in funcDef._body)
@@ -179,7 +223,10 @@ namespace DavidAsmCore
                     // Use R4 as a temp register. 
                     _emitter.WriteComment($"{funcDef._name} return.");
 
-                    _emitter.Add(Register.R5, -numLocals * 2, Register.R5); // Free locals 
+                    if (numLocals != 0)
+                    {
+                        _emitter.Add(Register.R5, -numLocals * 2, Register.R5); // Free locals 
+                    }
 
                     EmitPop(Register.R4);
                     _emitter.Add(Register.R4, 12, Register.R4);
@@ -377,21 +424,16 @@ namespace DavidAsmCore
                         // Determine overload. 
                         // lp.GetAddressOrRegister(out var addr1, out var addrReg1, out var Reg1);
                         var arg1 = lp.GetAddressOrRegister();
+                        Resolve(ref arg1, currentFunc);
 
                         lp.GetArrow();
 
                         // lp.GetAddressOrRegister(out var addr2, out var addrReg2, out var Reg2);
                         var arg2 = lp.GetAddressOrRegister();
-
+                        Resolve(ref arg2, currentFunc);
 
                         if (arg1 is AddressSpec addr1)
-                        {
-                            if (addr1 is StackAddressSpec s1)
-                            {
-                                // Resolve address offset...
-                                currentFunc.Resolve(s1);
-                            }
-
+                        {                            
                             if (arg2 is Register reg2)
                             {
                                 _emitter.MoveMemToReg(addr1, reg2);
@@ -404,12 +446,6 @@ namespace DavidAsmCore
                         {
                             if (arg2 is AddressSpec addr2)
                             {
-                                if (addr2 is StackAddressSpec s2)
-                                {
-                                    // Resolve address offset...
-                                    currentFunc.Resolve(s2);
-                                }
-
                                 _emitter.MoveRegToMem(reg1, addr2);
                             }
                             else if (arg2 is Register reg2)
@@ -487,6 +523,16 @@ namespace DavidAsmCore
                         EmitPush(Register.RIP);
 
                         _emitter.JumpLabel(label);
+
+                        // Caller will return us here ... now cleanup the args. 
+
+                        // Cleanup args
+                        int numArgs = args.Length;
+                        if (numArgs != 0)
+                        {
+                            _emitter.WriteComment($"pop local params {label}");
+                            _emitter.Add(Register.R5, -numArgs * 2, Register.R5); // pop parameters
+                        }
                     }
                     break;
 
@@ -496,6 +542,36 @@ namespace DavidAsmCore
 
             // Ensure end of line 
             lp.IsEOL();
+        }
+
+        private void Resolve(ref object obj, FunctionDefinition currentFunc)
+        {
+            if (obj is null)
+            {
+                throw new ArgumentNullException(nameof(obj));
+            }
+
+            if (obj is Register r)
+            {
+                // No change to register.
+
+            }
+            else if (obj is Label l)
+            {
+                // Resolve to global or local 
+                if (this._globals.TryGetValue(l, out var def))
+                {
+                    obj = def.address;
+                }
+                else if (currentFunc.TryResolve(l, out var s1))
+                {
+                    obj = s1;
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException($"Illegal symbol: {obj.GetType().Name}");
+            }
         }
 
         // Using R5 as the stack pointer.

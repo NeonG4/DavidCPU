@@ -7,6 +7,17 @@ using System.Threading.Tasks;
 namespace DavidAsmCore
 {
     /// <summary>
+    ///  Define a global variable 
+    /// </summary>
+    public class VariableDefinition
+    {
+        public Label _name;
+        internal ConstantAddressSpec address;
+
+        // Address we store at...
+    }
+
+    /// <summary>
     /// Definition of a function 
     /// </summary>
     public class FunctionDefinition
@@ -62,8 +73,10 @@ namespace DavidAsmCore
         {
             return _name.ToString();
         }
-
-        internal void Resolve(StackAddressSpec s1)
+        
+        // return true if the label is a local/param in this function. 
+        // else, return false.
+        internal bool TryResolve(Label label, out StackAddressSpec s1)
         {
 #if false
 Stack frame looks like:
@@ -77,20 +90,23 @@ Stack frame looks like:
         <-- R5
 #endif
             // Is it a local?
-            if (TryGetLocalIdx(s1._name, out var idx))
+            if (TryGetLocalIdx(label, out var idx))
             {
+                s1 = new StackAddressSpec {  _name = label };
                 s1.SetOffset((0 - _localNames.Count + idx - 1) * 2);
 
-                return;
+                return true;
             }
 
-            if (TryGetParamIdx(s1._name, out idx))
+            if (TryGetParamIdx(label, out idx))
             {
+                s1 = new StackAddressSpec { _name = label };
                 s1.SetOffset((0 - _localNames.Count - _paramNames.Count + idx - 1) * 2);
-                return;
+                return true;
             }
 
-            throw new InvalidOperationException($"Unrecognized symbol: {s1._name}");            
+            s1 = default;
+            return false;
         }
 
         private bool TryGetLocalIdx(Label l, out int idx)
@@ -115,4 +131,6 @@ Stack frame looks like:
             return false;
         }
     }
+
+
 }

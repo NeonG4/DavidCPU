@@ -40,6 +40,11 @@ namespace DavidAsmCore
             _writer.WriteComment(comment);
         }
 
+        public ConstantAddressSpec Alloc()
+        {
+            return _writer.Alloc();
+        }
+
         public void MarkLabel(Label label)        
         {
             _writer.WriteBlankLine();

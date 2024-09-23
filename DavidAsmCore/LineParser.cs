@@ -168,7 +168,8 @@ namespace DavidAsmCore
 
             // Is it a symbol? 
             var l = Label.New(t); // will validate
-            return new StackAddressSpec {  _name = l };
+            //return new StackAddressSpec {  _name = l };
+            return l;
 
             // throw new InvalidOperationException($"Must be a register or an address (enclosed in [ ... ]).");
         }

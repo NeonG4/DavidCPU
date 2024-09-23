@@ -47,6 +47,12 @@ namespace DavidAsmCore
                 string binaryString = Convert.ToString(b, 2).PadLeft(8, '0');
 
                 // Emit byte as binary. 
+                if (!compact)
+                {
+                    // Write address. 
+                    binaryString += $" // [{i+1}]";
+                }
+
                 output.WriteLine(binaryString);
             }
         }
@@ -61,6 +67,16 @@ namespace DavidAsmCore
                 _annotations.Add(offset, sb);
             }
             sb.AppendLine(line);
+        }
+
+        public ConstantAddressSpec Alloc()
+        {
+            var addr0 = this._bytes.Count;
+
+            // $$$ Take initial value 
+            this.WriteI16(-1); // push the counter.  
+
+            return new ConstantAddressSpec { Address = addr0 + 1 };
         }
 
         public void WriteComment(string comment)
